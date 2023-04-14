@@ -43,17 +43,23 @@ function di_crawler_generate_api(){
         'permission_callback' => '__return_true'
     ));
     
-        register_rest_route($api_token,'/feed/products/',array(
-            'methods' => 'GET',
-            'callback' => 'di_crawler_all_products_feed',
-            'permission_callback' => '__return_true'
-        ));
-    
-        register_rest_route($api_token,'/di-crawler-new-order/',array(
-            'methods' => 'POST',
-            'callback' => 'di_crawler_new_order',
-            'permission_callback' => '__return_true'
-        ));
+    register_rest_route($api_token,'/feed/products/',array(
+        'methods' => 'GET',
+        'callback' => 'di_crawler_all_products_feed',
+        'permission_callback' => '__return_true'
+    ));
+
+    register_rest_route($api_token,'/di-crawler-new-order/',array(
+        'methods' => 'POST',
+        'callback' => 'di_crawler_new_order',
+        'permission_callback' => '__return_true'
+    ));
+
+    register_rest_route($api_token,'/feed/orders/',array(
+        'methods' => 'GET',
+        'callback' => 'di_crawler_orders_feed',
+        'permission_callback' => '__return_true'
+    ));
 }
 
 function di_crawler_api_status_ok() {
@@ -213,6 +219,19 @@ function di_crawler_all_products_feed() {
     return $products_data;
 }
 
+function di_crawler_orders_feed() {
+    global $wpdb;
+
+    $orders = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."di_crawler_api` WHERE `name`='order' ORDER BY `id` ASC");
+
+    $feed_export = array();
+    foreach ($orders as $order) {
+        array_push($feed_export,array("id"=>$order->id,"value"=>json_decode($order->value)));
+    }
+
+    return $feed_export;
+}
+
 function di_crawler_new_order() {
     global $wpdb;
 
@@ -239,17 +258,17 @@ function di_crawler_new_order() {
 
 
     $address = array(
-        'first_name' => 'di agency',
-        'last_name'  => 'Retailromania.ro',
-        'company'    => 'Retailromania.ro',
-        'email'      => 'hello@diagency.eu',
+        'first_name' => $order_data['shipping_first_name'],
+        'last_name'  => $order_data['shipping_last_name'],
+        'company'    => $order_data['shipping_company'],
+        'email'      => '',
         'phone'      => '',
-        'address_1'  => '',
-        'address_2'  => '',
-        'city'       => '',
-        'state'      => '',
-        'postcode'   => '',
-        'country'    => ''
+        'address_1'  => $order_data['shipping_address_1'],
+        'address_2'  => $order_data['shipping_address_2'],
+        'city'       => $order_data['shipping_city'],
+        'state'      => $order_data['shipping_state'],
+        'postcode'   => $order_data['shipping_postcode'],
+        'country'    => $order_data['shipping_country']
     );
 
     $new_order->set_address( $address, 'billing' );

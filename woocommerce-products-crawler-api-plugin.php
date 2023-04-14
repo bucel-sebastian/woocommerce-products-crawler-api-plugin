@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name: di_agency products crawler API
+ * Plugin Name: Api Retailromania
  * Plugin URI: 
  * Description: 
  * Version: 1.0

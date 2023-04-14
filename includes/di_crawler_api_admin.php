@@ -24,7 +24,36 @@ if( !class_exists("Di_crawler_admin") ){
         }
 
         public function di_crawler_admin_add_menu_page() {
-            add_menu_page('di Products Crawler','di Products Crawler','manage_options','di-crawler-api',array($this,'di_crawler_admin_homepage'),'dashicons-star-filled',8);
+
+            global $wpdb;
+
+            $orders_list = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."di_crawler_api` WHERE `name`='order'");
+
+            $unseen_orders = 0;
+            $seen_orders = 0;
+            $ready_orders = 0;
+            foreach ($orders_list as $order) {
+                $order_details = json_decode($order->value);
+                if($order_details->order_status==="0"){
+                    $unseen_orders++;
+                }
+                else if($order_details->order_status==="1"){
+                    $seen_orders++;
+                }
+                else if($order_details->order_status==="2"){
+                    $ready_orders++;
+                }
+            }
+
+            add_menu_page(
+                'Api Retailromania',
+                'Api Retailromania <span class="awaiting-mod">' . $unseen_orders . '</span><span class="awaiting-mod" style="background:#E67E22;">' . $seen_orders . '</span><span class="awaiting-mod" style="background:#3498DB;">' . $ready_orders . '</span>',
+                'manage_options',
+                'di-crawler-api',
+                array($this,'di_crawler_admin_homepage'),
+                'dashicons-cart',
+                8
+            );
             
         }
 
