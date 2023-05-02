@@ -296,8 +296,9 @@ function di_crawler_new_order() {
         "name"=>"order",
         "value"=>json_encode(array(
                 "order_id"=>$new_order->get_id(),
-                "order_status"=>"0",
-                "awb"=>""
+                "order_status"=>"1",
+                "awb"=>"",
+                "order_date"=>date("Y-m-d H:i:s")
             ))
     ),
     array(

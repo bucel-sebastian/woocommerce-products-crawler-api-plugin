@@ -8,8 +8,8 @@
             foreach ($di_orders as $order) {
                 $di_order_data = json_decode($order->value);
                 if(strval($di_order_data->order_id) === $id){
-                    if($di_order_data->order_status === "0"){
-                        $di_order_data->order_status = "1";
+                    if($di_order_data->order_status === "1"){
+                        $di_order_data->order_status = "2";
 
                         $wpdb->update($wpdb->prefix . 'di_crawler_api',array(
                             'value'=>json_encode($di_order_data)
@@ -33,7 +33,7 @@
                 $di_order_data = json_decode($order->value);
                 if(strval($di_order_data->order_id) === $id){
                     $order_status = intval($di_order_data->order_status);
-                    if($order_status + 1 <= 3){
+                    if($order_status + 1 <= 4){
                         $order_status += 1;
                     }
                     $di_order_data->order_status = strval($order_status);
@@ -60,12 +60,15 @@
     border-radius:3px;
 }
 
-.status-new{
+.status-canceled{
     background-color:#E74C3C;
+}
+.status-new{
+    background-color:#E67E22;
 }
 
 .status-seen{
-    background-color:#E67E22;
+    background-color:#E6C222;
 }
 
 .status-ready{
@@ -81,7 +84,34 @@
 <h1>Retail Romania Orders</h1>
 <h2>Bine ai venit!</h2>
 <p>Din aceasta pagina se pot vizualiza comenzile primite de la Retailromania.ro</p>
+<div>
 
+    <form>
+        <div style='display:flex;flex-direction:row;margin-bottom:10px;'>
+            <div >
+                <label>
+                    Status
+                </label>
+                <select name="select-status" value="<?php echo $_GET['select-status'] !== "" ? $_GET['select-status'] : "" ;?>">
+                    <option value="" <?php echo $_GET['select-status'] === "" ? "selected" : "" ;?>>Toate</option>
+                    <option value="0" <?php echo $_GET['select-status'] === "0" ? "selected" : "" ;?>>Comanda anulata</option>
+                    <option value="1" <?php echo $_GET['select-status'] === "1" ? "selected" : "" ;?>>Comanda noua</option>
+                    <option value="2" <?php echo $_GET['select-status'] === "2" ? "selected" : "" ;?>>Comanda vizualizata</option>
+                    <option value="3" <?php echo $_GET['select-status'] === "3" ? "selected" : "" ;?>>Comanda pregatita</option>
+                    <option value="4" <?php echo $_GET['select-status'] === "4" ? "selected" : "" ;?>>Comanda trimisa</option>
+                </select>
+            </div>
+            <div>
+                <label>Data</label>
+                <input type="month" name="input-date" value="<?php echo $_GET['input-date'] !== "" ? $_GET['input-date'] : "" ;?>">
+            </div>
+    
+            <button type="submit" name="page" value="di-crawler-api" class='button button-primary'>Filtreaza</button>
+
+        </div>
+    </form>
+
+</div>
 <table class="widefat fixed striped " cellspacing="0" >
         <thead>
             <tr>
@@ -116,8 +146,28 @@
 
                 global $wpdb;
 
-                $di_orders = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."di_crawler_api` WHERE `name`='order' ORDER BY `id` DESC");
+                $filter_status = isset($_GET['select-status']) ? $_GET['select-status'] : "";
+                $filter_date = isset($_GET['input-date']) ? $_GET['input-date'] : "";
+
+                $where = array();
+                $where[] = "`name`='order'";
+
+                if( $filter_status !== '' ){
+                    $where[] = "`value` LIKE '%\"order_status\":\"".$filter_status."\"%'";
+                }
+                if( $filter_date !== '' ){
+                    $where[] = "`value` LIKE '%\"order_date\":\"".$filter_date."%'";
+                }
+
+
+
+                $where_sql = implode(' AND ', $where);
+
+
+                $di_orders = $wpdb->get_results("SELECT * FROM `".$wpdb->prefix."di_crawler_api` WHERE ".$where_sql." ORDER BY `id` DESC");
                 $index = 1;
+            
+
                 foreach ($di_orders as $order) {
 
                     $di_order_data = json_decode($order->value);
@@ -129,26 +179,33 @@
                     
                     if($di_order_data->order_status === "0"){   
                         $status = '
+                            <span class="di-order-status status-canceled">
+                                Comanda anulata
+                            </span>
+                        ';
+                    }
+                    else if($di_order_data->order_status === "1"){
+                        $status = '
                             <span class="di-order-status status-new">
                                 Comanda noua
                             </span>
                         ';
                     }
-                    else if($di_order_data->order_status === "1"){
+                    else if($di_order_data->order_status === "2"){
                         $status = '
                             <span class="di-order-status status-seen">
                                 Comanda vizualizata
                             </span>
                         ';
                     }
-                    else if($di_order_data->order_status === "2"){
+                    else if($di_order_data->order_status === "3"){
                         $status = '
                             <span class="di-order-status status-ready">
                                 Comanda pregatita
                             </span>
                         ';
                     }
-                    else if($di_order_data->order_status === "3"){
+                    else if($di_order_data->order_status === "4"){
                         $status = '
                             <span class="di-order-status status-sent">
                                 Comanda trimisa
@@ -210,6 +267,7 @@
                             </td>
                         </tr>
                     <?php
+                $index++;
                 }
 
             ?>

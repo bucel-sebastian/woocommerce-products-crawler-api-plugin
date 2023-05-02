@@ -34,20 +34,20 @@ if( !class_exists("Di_crawler_admin") ){
             $ready_orders = 0;
             foreach ($orders_list as $order) {
                 $order_details = json_decode($order->value);
-                if($order_details->order_status==="0"){
+                if($order_details->order_status==="1"){
                     $unseen_orders++;
                 }
-                else if($order_details->order_status==="1"){
+                else if($order_details->order_status==="2"){
                     $seen_orders++;
                 }
-                else if($order_details->order_status==="2"){
+                else if($order_details->order_status==="3"){
                     $ready_orders++;
                 }
             }
 
             add_menu_page(
                 'Api Retailromania',
-                'Api Retailromania <span class="awaiting-mod">' . $unseen_orders . '</span><span class="awaiting-mod" style="background:#E67E22;">' . $seen_orders . '</span><span class="awaiting-mod" style="background:#3498DB;">' . $ready_orders . '</span>',
+                'Api Retailromania <span class="awaiting-mod" style="background:#E67E22;">' . $unseen_orders . '</span><span class="awaiting-mod" style="background:#E6C222;">' . $seen_orders . '</span><span class="awaiting-mod" style="background:#3498DB;">' . $ready_orders . '</span>',
                 'manage_options',
                 'di-crawler-api',
                 array($this,'di_crawler_admin_homepage'),

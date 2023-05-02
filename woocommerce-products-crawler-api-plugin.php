@@ -21,6 +21,8 @@ if( !defined('DI_CRAWLER_API_URL') ){
     define('DI_CRAWLER_API_URL', plugin_dir_path(__FILE__));
 }
 
+require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
 if( !class_exists('Di_Crawler_Api') ){
 
     class Di_Crawler_Api {
@@ -54,18 +56,6 @@ if( !class_exists('Di_Crawler_Api') ){
     }
     new Di_Crawler_Api();
 }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
